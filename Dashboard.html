@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriCare - Premium Enterprise Agriculture SaaS Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           1. ROOT VARIABLES & THEMES
+           ========================================================================== */
+        :root {
+            --primary-green: #2E7D32;
+            --secondary-green: #43A047;
+            --light-green: #A5D6A7;
+            --bg-primary: #F5FFF6;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 78px;
+            --navbar-height: 70px;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(46, 125, 50, 0.15);
+            --card-shadow: 0 8px 32px 0 rgba(46, 125, 50, 0.06);
+            --text-main: #1B5E20;
+            --text-sub: #4E7D52;
+            --white: #ffffff;
+            --transition-speed: 0.3s;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0A110B;
+            --glass-bg: rgba(15, 28, 18, 0.85);
+            --glass-border: rgba(165, 214, 167, 0.15);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            --text-main: #E8F5E9;
+            --text-sub: #A5D6A7;
+            --white: #112214;
+        }
+
+        /* ==========================================================================
+           2. BASE STYLES & RESET
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--light-green);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-green);
+        }
+
+        /* ==========================================================================
+           3. KEYFRAME ANIMATIONS
+           ========================================================================== */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulseLeaf { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.1) rotate(10deg); } }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .animate-fade-in { animation: fadeIn 0.6s ease forwards; }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+        /* ==========================================================================
+           4. PRELOADER SCREEN
+           ========================================================================== */
+        #preloader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-primary);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        #preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-logo {
+            font-size: 3.5rem;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+            animation: pulseLeaf 2s infinite ease-in-out;
+        }
+        .loader-bar-container {
+            width: 240px;
+            height: 6px;
+            background: rgba(46, 125, 50, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loader-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* ==========================================================================
+           5. LAYOUT ARCHITECTURE (SIDEBAR & MAIN CONTENT)
+           ========================================================================== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Glassmorphic Design */
+        aside {
+            width: var(--sidebar-width);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid var(--glass-border);
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        body.sidebar-collapsed aside {
+            width: var(--sidebar-collapsed-width);
+        }
+        .sidebar-brand {
+            height: var(--navbar-height);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 14px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--primary-green);
+            font-weight: 700;
+            font-size: 1.3rem;
+            white-space: nowrap;
+        }
+        .sidebar-brand i {
+            font-size: 1.6rem;
+            transition: transform var(--transition-speed);
+        }
+        body.sidebar-collapsed .sidebar-brand span {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 15px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            color: var(--text-sub);
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            gap: 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+        .sidebar-menu li a i {
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .sidebar-menu li a:hover {
+            background: rgba(46, 125, 50, 0.08);
+            color: var(--primary-green);
+        }
+        .sidebar-menu li a:hover i {
+            transform: scale(1.1);
+        }
+        .sidebar-menu li.active a {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
+        }
+        body.sidebar-collapsed .sidebar-menu li a span {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Main Workspace Content Area */
+        main {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            padding: calc(var(--navbar-height) + 24px) 24px 40px 24px;
+            min-width: 0;
+        }
+        body.sidebar-collapsed main {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* ==========================================================================
+           6. TOP STICKY NAVBAR
+           ========================================================================== */
+        header {
+            position: fixed;
+            top: 0; right: 0;
+            left: var(--sidebar-width);
+            height: var(--navbar-height);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            transition: left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body.sidebar-collapsed header {
+            left: var(--sidebar-collapsed-width);
+        }
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            max-width: 500px;
+        }
+        .menu-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .menu-toggle-btn:hover {
+            background: rgba(46, 125, 50, 0.1);
+        }
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .search-wrapper i {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 16px 10px 42px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.5);
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        [data-theme="dark"] .search-wrapper input {
+            background: rgba(0,0,0,0.2);
+        }
+        .search-wrapper input:focus {
+            border-color: var(--primary-green);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+        }
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .weather-badge {
+            background: rgba(46, 125, 50, 0.08);
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--glass-border);
+        }
+        .nav-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            width: 38px; height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .nav-action-btn:hover {
+            background: rgba(46, 125, 50, 0.1);
+        }
+        .nav-badge-dot {
+            position: absolute;
+            top: 6px; right: 6px;
+            width: 8px; height: 8px;
+            background: #D32F2F;
+            border-radius: 50%;
+        }
+        .user-nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 12px;
+            border-left: 1px solid var(--glass-border);
+        }
+        .user-nav-profile img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--secondary-green);
+        }
+        .user-nav-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-nav-info .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .user-nav-info .role {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+        /* Dropdown Architecture */
+        .dropdown-panel {
+            position: absolute;
+            top: calc(var(--navbar-height) - 5px);
+            right: 24px;
+            width: 320px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--card-shadow);
+            padding: 12px 0;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            animation: slideUp 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .dropdown-panel.show { display: flex; }
+        .dropdown-header {
+            padding: 8px 16px 12px 16px;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid rgba(46,125,50,0.05);
+        }
+        .dropdown-item:hover { background: rgba(46, 125, 50, 0.05); }
+        .dropdown-item i { color: var(--primary-green); margin-top: 3px; }
+        .dropdown-item-text p { font-size: 0.85rem; font-weight: 500; }
+        .dropdown-item-text span { font-size: 0.75rem; color: var(--text-sub); }
+
+        /* ==========================================================================
+           7. MODULE PANELS AND CARD DESIGN SYSTEMS
+           ========================================================================== */
+        .module-section {
+            display: none;
+        }
+        .module-section.active-section {
+            display: block;
+        }
+
+        /* Glassmorphic Dashboard UI Panels */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--card-shadow);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            pointer-events: none;
+        }
+        .glass-card:hover::before {
+            animation: shine 0.8s ease-in-out;
+        }
+        .glass-card.interactive-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 14px 40px rgba(46, 125, 50, 0.12);
+        }
+
+        /* Dashboard Hero Banner Widget */
+        .dashboard-hero-banner {
+            background: linear-gradient(135deg, var(--primary-green), #1B5E20);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(46,125,50,0.2);
+        }
+        .dashboard-hero-banner h2 { color: #fff; margin-bottom: 8px; font-size: 1.8rem; }
+        .dashboard-hero-banner p { color: var(--light-green); max-width: 60%; font-size: 0.95rem; line-height: 1.5; }
+        .hero-banner-illustration {
+            font-size: 5.5rem;
+            color: rgba(255,255,255,0.15);
+            position: absolute;
+            right: 40px;
+            animation: float 4s infinite ease-in-out;
+        }
+
+        /* Grid Framework Layouts */
+        .metrics-matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .metric-mini-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .metric-icon-box {
+            width: 52px; height: 52px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(46,125,50,0.12), rgba(67,160,71,0.05));
+            color: var(--primary-green);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+            border: 1px solid var(--glass-border);
+        }
+        .metric-data-fields .counter {
+            font-size: 1.6rem; font-weight: 700; color: var(--text-main); line-height: 1.2;
+        }
+        .metric-data-fields label {
+            font-size: 0.8rem; color: var(--text-sub); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .dashboard-layout-split {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .unified-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        /* Generic Section Interface Standard Styling */
+        .section-header-block {
+            margin-bottom: 20px;
+        }
+        .section-header-block h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+        .section-header-block h2::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: 0; width: 40px; height: 3px;
+            background: var(--secondary-green);
+            border-radius: 2px;
+        }
+        .section-subtext {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+            margin-bottom: 20px;
+        }
+
+        /* UI Interaction Elements */
+        .agri-btn {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: #fff; border: none;
+            padding: 10px 20px;
+            font-size: 0.85rem; font-weight: 600;
+            border-radius: var(--radius-md);
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+        }
+        .agri-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46,125,50,0.25);
+        }
+        .agri-btn.btn-outline {
+            background: transparent;
+            color: var(--primary-green);
+            border: 1px solid var(--primary-green);
+        }
+        .agri-btn.btn-outline:hover {
+            background: rgba(46,125,50,0.05);
+        }
+
+        /* Form Engine Controls */
+        .form-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .form-control-group label {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-main);
+        }
+        .form-control-group input, .form-control-group select, .form-control-group textarea {
+            padding: 11px 14px;
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.6);
+            color: var(--text-main);
+            outline: none; font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+        [data-theme="dark"] .form-control-group input, [data-theme="dark"] .form-control-group select, [data-theme="dark"] .form-control-group textarea {
+            background: rgba(0,0,0,0.15);
+        }
+        .form-control-group input:focus, .form-control-group select:focus, .form-control-group textarea:focus {
+            border-color: var(--primary-green);
+        }
+
+        /* ==========================================================================
+           8. SPECIFIC MODULE DATA CONTENT LAYOUTS
+           ========================================================================== */
+        /* Government Schemes & Farming Advice Cards */
+        .scheme-badge {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(46,125,50,0.1); color: var(--primary-green);
+            padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+        }
+        .card-meta-list {
+            list-style: none; margin: 14px 0; font-size: 0.85rem; color: var(--text-sub);
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .card-meta-list li i { color: var(--secondary-green); width: 18px; }
+
+        /* AI Crop Diagnostic Drop-zone Interface */
+        .file-dropzone-area {
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 40px 20px; text-align: center;
+            cursor: pointer; background: rgba(46,125,50,0.02);
+            transition: all 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .file-dropzone-area:hover, .file-dropzone-area.dragover {
+            border-color: var(--primary-green);
+            background: rgba(46,125,50,0.06);
+        }
+        .file-dropzone-area i { font-size: 3rem; color: var(--secondary-green); }
+        .diagnostic-preview-box {
+            max-width: 280px; max-height: 200px; display: none; margin: 15px auto;
+            border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--light-green);
+        }
+        .diagnostic-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* Interactive Disease Directory Tabs */
+        .directory-tabs-nav {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px;
+        }
+        .tab-nav-pill {
+            padding: 8px 16px; background: rgba(46,125,50,0.06); border: 1px solid var(--glass-border);
+            border-radius: 30px; font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--text-sub);
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .tab-nav-pill.active-pill {
+            background: var(--primary-green); color: #fff; border-color: var(--primary-green);
+        }
+
+        /* High-Definition Weather Feature Grid */
+        .weather-matrix-display {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; margin-top: 20px;
+        }
+        .weather-mini-node {
+            background: rgba(46,125,50,0.04); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md); padding: 14px; text-align: center;
+        }
+        .weather-mini-node i { font-size: 1.5rem; color: var(--secondary-green); margin-bottom: 6px; }
+        .weather-mini-node span { display: block; font-size: 0.75rem; color: var(--text-sub); }
+        .weather-mini-node font { display: block; font-size: 1.1rem; font-weight: 700; margin-top: 2px; }
+
+        /* Commodity Market Datatable Layout */
+        .market-data-table-container {
+            width: 100%; overflow-x: auto;
+        }
+        .agri-data-table {
+            width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;
+        }
+        .agri-data-table th {
+            background: rgba(46,125,50,0.08); padding: 14px 16px; font-weight: 600; color: var(--text-main);
+            border-bottom: 2px solid var(--glass-border);
+        }
+        .agri-data-table td {
+            padding: 14px 16px; border-bottom: 1px solid var(--glass-border); color: var(--text-main);
+        }
+        .agri-data-table tbody tr:hover { background: rgba(46,125,50,0.02); }
+        .trend-badge {
+            padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .trend-up { background: rgba(76,175,80,0.15); color: #2E7D32; }
+        .trend-down { background: rgba(244,67,54,0.15); color: #C62828; }
+
+        /* Timeline Metric Log Activity Feed */
+        .timeline-wrapper {
+            position: relative; padding-left: 24px; display: flex; flex-direction: column; gap: 20px;
+        }
+        .timeline-wrapper::before {
+            content: ''; position: absolute; left: 6px; top: 5px; bottom: 5px; width: 2px; background: var(--glass-border);
+        }
+        .timeline-item-node {
+            position: relative;
+        }
+        .timeline-item-node::before {
+            content: ''; position: absolute; left: -22px; top: 4px; width: 10px; height: 10px; border-radius: 50%;
+            background: var(--secondary-green); border: 2px solid var(--bg-primary);
+        }
+        .timeline-item-node span { font-size: 0.75rem; color: var(--text-sub); }
+        .timeline-item-node p { font-size: 0.85rem; font-weight: 500; margin-top: 2px; }
+
+        /* Grid Quick-Links Framework */
+        .quick-action-matrix {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;
+        }
+        .action-square-btn {
+            background: rgba(46,125,50,0.04); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md); padding: 16px; text-align: center; cursor: pointer;
+            transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .action-square-btn:hover {
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: #fff; border-color: var(--primary-green); transform: translateY(-4px);
+        }
+        .action-square-btn:hover i { color: #fff; }
+        .action-square-btn i { font-size: 1.5rem; color: var(--primary-green); transition: color 0.2s; }
+        .action-square-btn span { font-size: 0.8rem; font-weight: 600; }
+
+        /* Enterprise Crop Calendar Schedule Grid Layout */
+        .calendar-months-matrix {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;
+        }
+        .calendar-month-box {
+            background: var(--white); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--glass-border);
+        }
+        .calendar-month-box h4 { font-size: 0.95rem; font-weight: 600; border-bottom: 1px solid var(--glass-border); padding-bottom: 6px; margin-bottom: 10px; }
+        .calendar-event-tag {
+            font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; margin-bottom: 6px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+        }
+        .tag-sowing { background: rgba(33,150,243,0.12); color: #1565C0; }
+        .tag-harvesting { background: rgba(255,152,0,0.12); color: #EF6C00; }
+        .tag-spraying { background: rgba(156,39,176,0.12); color: #6A1B9A; }
+
+        /* Layout Footer Construction Section */
+        footer {
+            margin-top: 40px; border-top: 1px solid var(--glass-border); padding-top: 24px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+        }
+        footer p { font-size: 0.85rem; color: var(--text-sub); }
+        .footer-socials { display: flex; gap: 14px; }
+        .footer-socials a { color: var(--text-sub); font-size: 1.1rem; transition: color 0.2s; text-decoration: none; }
+        .footer-socials a:hover { color: var(--primary-green); }
+
+        .back-to-top-widget {
+            position: fixed; bottom: 25px; right: 25px; width: 44px; height: 44px;
+            background: var(--primary-green); color: #fff; border: none; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 99; transition: transform 0.2s;
+        }
+        .back-to-top-widget:hover { transform: scale(1.1); }
+
+        /* ==========================================================================
+           9. RESPONSIVE MEDIA QUERIES BREAKPOINTS
+           ========================================================================== */
+        @media (max-width: 1024px) {
+            .dashboard-layout-split { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            aside { left: -100%; }
+            body.sidebar-mobile-open aside { left: 0; width: var(--sidebar-width); }
+            main { margin-left: 0 !important; padding-left: 16px; padding-right: 16px; }
+            header { left: 0 !important; padding: 0 16px; }
+            .navbar-left { max-width: 180px; }
+            .search-wrapper input { padding-left: 32px; font-size: 0.85rem; }
+            .search-wrapper i { left: 10px; }
+            .user-nav-info, .weather-badge { display: none; }
+            .dashboard-hero-banner { flex-direction: column; text-align: center; gap: 20px; }
+            .dashboard-hero-banner p { max-width: 100%; }
+            .hero-banner-illustration { position: relative; right: auto; font-size: 4rem; }
+        }
+        @media (max-width: 480px) {
+            .metrics-matrix-grid { grid-template-columns: 1fr; }
+            .unified-card-grid { grid-template-columns: 1fr; }
+            .dropdown-panel { width: 280px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <i class="fa-solid fa-seedling loader-logo"></i>
+        <div class="loader-bar-container">
+            <div class="loader-bar" id="loaderBar"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+
+        <aside id="appSidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-leaf"></i>
+                <span>AgriCare OS</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" data-target="dashboard-section"><a href="#dashboard"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a></li>
+                <li data-target="schemes-section"><a href="#schemes"><i class="fa-solid fa-gavel"></i><span>Govt Schemes</span></a></li>
+                <li data-target="tips-section"><a href="#tips"><i class="fa-solid fa-lightbulb"></i><span>Farming Tips</span></a></li>
+                <li data-target="recommendation-section"><a href="#recommendation"><i class="fa-solid fa-seedling"></i><span>Crop Predictor</span></a></li>
+                <li data-target="detection-section"><a href="#detection"><i class="fa-solid fa-microscope"></i><span>AI Diagnostics</span></a></li>
+                <li data-target="disease-info-section"><a href="#disease-info"><i class="fa-solid fa-book-open"></i><span>Disease Index</span></a></li>
+                <li data-target="weather-section"><a href="#weather"><i class="fa-solid fa-cloud-sun-rain"></i><span>Weather Hub</span></a></li>
+                <li data-target="market-section"><a href="#market"><i class="fa-solid fa-arrow-trend-up"></i><span>Market Tracker</span></a></li>
+                <li data-target="contact-section"><a href="#contact"><i class="fa-solid fa-headset"></i><span>Support Hub</span></a></li>
+            </ul>
+        </aside>
+
+        <header>
+            <div class="navbar-left">
+                <button class="menu-toggle-btn" id="sidebarToggle" aria-label="Toggle Navigation Side Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="globalSearchInput" placeholder="Global structural search module query...">
+                </div>
+            </div>
+            
+            <div class="navbar-right">
+                <div class="weather-badge">
+                    <i class="fa-solid fa-temperature-high"></i>
+                    <span>28°C — High Yield Humidity</span>
+                </div>
+                
+                <button class="nav-action-btn" id="themeToggleBtn" aria-label="Toggle Dark Mode Theme Matrix Grid">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                
+                <button class="nav-action-btn" id="notifDropdownBtn" aria-label="Open System Alerts Dropdown Grid UI">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="nav-badge-dot"></span>
+                </button>
+                <div class="dropdown-panel" id="notifDropdownPanel">
+                    <div class="dropdown-header">System Broadcast Notifications</div>
+                    <div class="dropdown-item">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <div class="dropdown-item-text">
+                            <p>Pest Outbreak Alert Issued</p>
+                            <span>Neighboring sector tracked high Locust counts.</span>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <div class="dropdown-item-text">
+                            <p>Soil Health Analysis Form Complete</p>
+                            <span>Sector 4 Nitrogen telemetry uploaded successfully.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-nav-profile">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100" alt="Profile Data User Avatar Node">
+                    <div class="user-nav-info">
+                        <span class="name">Welcome Farmer</span>
+                        <span class="role">Agronomist Pro</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <section id="dashboard-section" class="module-section active-section data-searchable-scope animate-slide-up">
+                <div class="dashboard-hero-banner">
+                    <div>
+                        <h2 id="typingWelcome"></h2>
+                        <p>Telemetry reports optimum performance metrics across standard sectors. Soil hydrology baseline metrics are currently tracking 4.2% above season thresholds.</p>
+                    </div>
+                    <i class="fa-solid fa-wheat-awn hero-banner-illustration"></i>
+                </div>
+
+                <div class="metrics-matrix-grid">
+                    <div class="glass-card metric-mini-card interactive-lift">
+                        <div class="metric-icon-box"><i class="fa-solid fa-gavel"></i></div>
+                        <div class="metric-data-fields">
+                            <div class="counter" data-target="12">0</div>
+                            <label>Active Schemes</label>
+                        </div>
+                    </div>
+                    <div class="glass-card metric-mini-card interactive-lift">
+                        <div class="metric-icon-box"><i class="fa-solid fa-seedling"></i></div>
+                        <div class="metric-data-fields">
+                            <div class="counter" data-target="45">0</div>
+                            <label>Crops Catalogued</label>
+                        </div>
+                    </div>
+                    <div class="glass-card metric-mini-card interactive-lift">
+                        <div class="metric-icon-box"><i class="fa-solid fa-microscope"></i></div>
+                        <div class="metric-data-fields">
+                            <div class="counter" data-target="99">0</div>
+                            <label>Diagnostic %</label>
+                        </div>
+                    </div>
+                    <div class="glass-card metric-mini-card interactive-lift">
+                        <div class="metric-icon-box"><i class="fa-solid fa-users"></i></div>
+                        <div class="metric-data-fields">
+                            <div class="counter" data-target="2480">0</div>
+                            <label>Local Farmers</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-layout-split">
+                    <div class="glass-card">
+                        <div class="section-header-block">
+                            <h2>Telemetry Activity Registry Log</h2>
+                        </div>
+                        <div class="timeline-wrapper">
+                            <div class="timeline-item-node">
+                                <span>14 minutes ago</span>
+                                <p>AI Disease Diagnostics Engine validated leaf profile match: <strong>Tomato Early Blight</strong>.</p>
+                            </div>
+                            <div class="timeline-item-node">
+                                <span>2 hours ago</span>
+                                <p>Application submission finalized for <em>PM-KISAN Financial Support Cycle 12</em>.</p>
+                            </div>
+                            <div class="timeline-item-node">
+                                <span>Yesterday</span>
+                                <p>Atmospheric moisture model alert triggered: High moisture profile variant imminent.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <div class="section-header-block">
+                            <h2>Operations Interface</h2>
+                        </div>
+                        <div class="quick-action-matrix">
+                            <div class="action-square-btn redirection-action-node" data-route="detection-section">
+                                <i class="fa-solid fa-camera"></i>
+                                <span>Scan Pathology</span>
+                            </div>
+                            <div class="action-square-btn redirection-action-node" data-route="recommendation-section">
+                                <i class="fa-solid fa-calculator"></i>
+                                <span>Yield Predictor</span>
+                            </div>
+                            <div class="action-square-btn redirection-action-node" data-route="weather-section">
+                                <i class="fa-solid fa-cloud-bolt"></i>
+                                <span>Radar Grid</span>
+                            </div>
+                            <div class="action-square-btn redirection-action-node" data-route="market-section">
+                                <i class="fa-solid fa-wallet"></i>
+                                <span>Market Indexes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="section-header-block">
+                        <h2>Chronological Sector Crop Schedule Tracker</h2>
+                    </div>
+                    <div class="calendar-months-matrix">
+                        <div class="calendar-month-box">
+                            <h4>July 2026 Grid</h4>
+                            <div class="calendar-event-tag tag-sowing"><i class="fa-solid fa-circle"></i>Kharif Sowing Cycle</div>
+                            <div class="calendar-event-tag tag-spraying"><i class="fa-solid fa-circle"></i>Bio-Pesticide Routine</div>
+                        </div>
+                        <div class="calendar-month-box">
+                            <h4>August 2026 Grid</h4>
+                            <div class="calendar-event-tag tag-spraying"><i class="fa-solid fa-circle"></i>Nitrogen Enrichment</div>
+                        </div>
+                        <div class="calendar-month-box">
+                            <h4>September 2026 Grid</h4>
+                            <div class="calendar-event-tag tag-harvesting"><i class="fa-solid fa-circle"></i>Early Paddy Harvest</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="schemes-section" class="module-section data-searchable-scope">
+                <div class="section-header-block">
+                    <h2>Federal Agricultural Program Registries</h2>
+                </div>
+                <p class="section-subtext">Verified socio-economic support programs, grants, and credit facilities managed via central ministry portals.</p>
+                <div class="unified-card-grid" id="schemesWrapperTargetGrid">
+                    </div>
+            </section>
+
+            <section id="tips-section" class="module-section data-searchable-scope">
+                <div class="section-header-block">
+                    <h2>Strategic Agronomic Field Advice & Manuals</h2>
+                </div>
+                <p class="section-subtext">Precision guidelines, ecological standard operations, and efficiency frameworks for soil performance preservation.</p>
+                <div class="unified-card-grid" id="tipsWrapperTargetGrid">
+                    </div>
+            </section>
+
+            <section id="recommendation-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Predictive Analytics Machine Learning Crop Selector</h2>
+                </div>
+                <p class="section-subtext">Statistical inference modeling utilizing environment parameters to isolate max-yield target crop configurations.</p>
+                
+                <div class="dashboard-layout-split">
+                    <div class="glass-card">
+                        <form id="cropPredictorFormEngine">
+                            <div class="form-control-group">
+                                <label for="soilTypeSelectNode">Topsoil Stratum Profile Classification</label>
+                                <select id="soilTypeSelectNode" required>
+                                    <option value="Loamy">Loam Soil (Normal Mud)</option>
+                                    <option value="Clayey">Clay Soil (Sticky Clay)</option>
+                                    <option value="Sandy">Sandy Soil (Sand)</option>
+                                    <option value="Black">Black Soil (Dark Soil)</option>
+                                </select>
+                            </div>
+                            <div class="form-control-group">
+                                <label for="tempInputRangeNode">Mean Thermosphere Sensor Matrix Temperature (°C)</label>
+                                <input type="number" id="tempInputRangeNode" min="10" max="50" value="28" required>
+                            </div>
+                            <div class="form-control-group">
+                                <label for="humidInputRangeNode">Relative Humidity Telemetry Influx (%)</label>
+                                <input type="number" id="humidInputRangeNode" min="10" max="100" value="70" required>
+                            </div>
+                            <div class="form-control-group">
+                                <label for="rainInputRangeNode">Annual Aggregate Precipitation Hydrology Model (mm)</label>
+                                <input type="number" id="rainInputRangeNode" min="200" max="3000" value="1100" required>
+                            </div>
+                            <button type="submit" class="agri-btn"><i class="fa-solid fa-microchip"></i>Execute Optimization Inference Model</button>
+                        </form>
+                    </div>
+
+                    <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                        <div id="predictionResultFallbackDisplay">
+                            <i class="fa-solid fa-brain" style="font-size: 3.5rem; color: var(--light-green); margin-bottom: 14px;"></i>
+                            <h4>Awaiting Data Arrays</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 6px;">Configure real-time environmental values on the telemetry input panel to build prediction analysis models.</p>
+                        </div>
+                        <div id="predictionResultActiveDisplay" style="display: none;">
+                            <div style="font-size: 4rem; color: var(--primary-green); margin-bottom: 10px;"><i class="fa-solid fa-wheat-awn"></i></div>
+                            <h3 id="predictedCropTargetLabel" style="font-size: 1.6rem; margin-bottom: 8px;">Premium Rice Core</h3>
+                            <p style="font-size: 0.9rem; margin-bottom: 14px;">Confidence Interval Score: <strong id="predictionConfidenceMetric">94.8% Score</strong></p>
+                            <div style="background: rgba(46,125,50,0.06); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; text-align: left; border: 1px solid var(--glass-border);">
+                                <strong>System Operations Advisory:</strong> Parameters match target hydration criteria profiles cleanly. Initiate seed layout maps promptly.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="detection-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Computer Vision Cloud-Neural Diagnostic Engine</h2>
+                </div>
+                <p class="section-subtext">Drop leaf imagery payloads below to run predictive tensor classifications matching active pest pathology indexes.</p>
+                
+                <div class="dashboard-layout-split">
+                    <div class="glass-card">
+                        <div class="file-dropzone-area" id="diagnosticDropzoneWrapper">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <h4>Drag & Drop Foliage Imagery Here</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-sub);">Supports high-resolution PNG, JPEG payload formats directly</p>
+                            <span style="font-size: 0.85rem; font-weight: 600;">OR</span>
+                            <input type="file" id="hiddenDropzoneFileInputNode" accept="image/*" style="display: none;">
+                            <button class="agri-btn btn-outline" id="dropzoneSimulateTriggerBtn">Browse Local Storage Arrays</button>
+                        </div>
+                        <div class="diagnostic-preview-box" id="diagnosticImagePreviewContainer">
+                            <img src="" id="diagnosticTargetImageElement" alt="User Transmitted Crop Foliage Specimen Array">
+                        </div>
+                    </div>
+
+                    <div class="glass-card" id="diagnosticResultViewContainer" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                        <div id="diagnosticFallbackDisplay">
+                            <i class="fa-solid fa-expand" style="font-size: 3.5rem; color: var(--light-green); margin-bottom: 14px;"></i>
+                            <h4>Awaiting Neural Payload Delivery</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-sub); margin-top: 6px;">Transmit structural leaf or plant stem imagery vectors to process disease classifications.</p>
+                        </div>
+                        <div id="diagnosticActiveDisplay" style="display: none; text-align: left; width: 100%;">
+                            <h3 style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                                <i class="fa-solid fa-virus-covid" style="color: #D32F2F;"></i>
+                                <span id="diagnosticResultDiseaseLabel">Tomato Early Blight</span>
+                            </h3>
+                            <div style="margin-bottom: 14px; background: rgba(211,47,47,0.06); border: 1px solid rgba(211,47,47,0.2); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem;">
+                                <strong>Confidence Coefficient:</strong> <span id="diagnosticConfidenceValue">91.4% Confidence Rating</span>
+                            </div>
+                            <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Immediate Action Mitigation Protocol:</h4>
+                            <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 14px;" id="diagnosticTreatmentText">Isolate infected quadrants from active spray loops. Administer copper-based functional fungicide compounds uniformly across affected zones within a 48-hour operational window.</p>
+                            <button class="agri-btn btn-outline" id="resetDiagnosticWorkflowBtn" style="width: 100%; justify-content: center;">Purge Diagnostic Pipeline Buffer</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="disease-info-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Global Pathology Encyclopedia & Vector Catalog</h2>
+                </div>
+                <p class="section-subtext">Static reference directories outlining symptoms, etiologies, and mitigation protocols across standard regional crops.</p>
+                
+                <div class="directory-tabs-nav" id="encyclopediaTabsContainer">
+                    </div>
+                <div class="glass-card" id="encyclopediaDynamicContentPanel">
+                    </div>
+            </section>
+
+            <section id="weather-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Micro-Climate Telemetry Station Framework</h2>
+                </div>
+                <p class="section-subtext">Real-time localized multi-sensor metrics streaming directly from edge weather arrays.</p>
+                
+                <div class="glass-card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(67,160,71,0.05), rgba(46,125,50,0.12));">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <span style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; color: var(--text-sub);">Current Micro-Sector Context</span>
+                            <h3 style="font-size: 2.2rem; margin-top: 4px;">28.4°C <span style="font-size: 1.2rem; font-weight: 500; color: var(--text-sub);">/ Clear Sky Baseline</span></h3>
+                        </div>
+                        <i class="fa-solid fa-sun" style="font-size: 3.5rem; color: #FFA000;"></i>
+                    </div>
+                    
+                    <div class="weather-matrix-display">
+                        <div class="weather-mini-node">
+                            <i class="fa-solid fa-droplet"></i>
+                            <span>Hydrology Mix</span>
+                            <font>64% RH</font>
+                        </div>
+                        <div class="weather-mini-node">
+                            <i class="fa-solid fa-wind"></i>
+                            <span>Barometric Drift</span>
+                            <font>14.2 km/h</font>
+                        </div>
+                        <div class="weather-mini-node">
+                            <i class="fa-solid fa-cloud-showers-water"></i>
+                            <span>Precipitation Prob</span>
+                            <font>12% Delta</font>
+                        </div>
+                        <div class="weather-mini-node">
+                            <i class="fa-solid fa-gauge"></i>
+                            <span>Air Density Pressure</span>
+                            <font>1012 hPa</font>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-size: 1.05rem; margin-bottom: 16px;">5-Day Chronological Forward Predictive Telemetry Grid</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px;" id="weatherForecastWrapperContainer">
+                        </div>
+                </div>
+            </section>
+
+            <section id="market-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Wholesale Agro-Commodity Index Interface</h2>
+                </div>
+                <p class="section-subtext">Real-time valuation index metrics compiled across regional agriculture markets and distribution yards.</p>
+                
+                <div class="glass-card">
+                    <div class="market-data-table-container">
+                        <table class="agri-data-table">
+                            <thead>
+                                <tr>
+                                   <!-- Change your table header line to this -->
+<th>Target Agri-Commodity Class</th>
+<th>Spot Price (₹ / Quintal)</th>
+<th>Previous Lock Index (₹)</th>
+<th>Net Delta Status</th>
+<th>System Risk Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marketPricesTableBodyTarget">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact-section" class="module-section">
+                <div class="section-header-block">
+                    <h2>Enterprise Support Engineering Portal</h2>
+                </div>
+                <p class="section-subtext">Log diagnostic tickets directly to the regional agronomy desk or schedule high-priority on-site sector inspections.</p>
+                
+                <div class="dashboard-layout-split">
+                    <div class="glass-card">
+                        <form id="contactFormSystemEngine">
+                            <div class="form-control-group">
+                                <label for="contactSubjectLineNode">Functional Ticket Category Anchor</label>
+                                <select id="contactSubjectLineNode" required>
+                                    <option value="pathology">Soil Pathology Breakdown Escalation</option>
+                                    <option value="billing">SaaS Subscription & License Configurations</option>
+                                    <option value="hardware">Edge Sensor Matrix Calibration Support</option>
+                                </select>
+                            </div>
+                            <div class="form-control-group">
+                                <label for="contactMessageBodyTextArea">Detailed Telemetry/Anomaly Profile Narration</label>
+                                <textarea id="contactMessageBodyTextArea" rows="5" placeholder="Specify anomalous matrix values or field conditions fully..." required></textarea>
+                            </div>
+                            <button type="submit" class="agri-btn"><i class="fa-solid fa-paper-plane"></i>Transmit Ticket Array</button>
+                        </form>
+                    </div>
+
+                    <div class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                           <h4 style="font-size: 1rem; margin-bottom: 6px;">Central Logistics Node Core</h4>
+<p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5;">
+    <i class="fa-solid fa-building" style="width: 20px; color: var(--secondary-green);"></i>784 Agronomy Hub, Core Sector 4, Kalyan, Maharashtra, India<br>
+    <i class="fa-solid fa-clock" style="width: 20px; color: var(--secondary-green);"></i>Continuous Coverage Matrix: 06:00 AM – 10:00 PM IST<br>
+    <i class="fa-solid fa-phone" style="width: 20px; color: var(--secondary-green);"></i>+91 98200 12345 (Priority Support Lane)
+</p>
+                        </div>
+                        <div style="flex: 1; min-height: 150px; background: rgba(46,125,50,0.05); border: 1px dashed var(--glass-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; color: var(--text-sub); padding: 20px;">
+                            <div>
+                                <i class="fa-solid fa-map-location-dot" style="font-size: 2rem; color: var(--light-green); margin-bottom: 8px;"></i>
+                                <p>Integrated GIS Geo-Tracking Infrastructure Canvas Mapping Pipeline Buffer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer>
+                <p>&copy; 2026 AgriCare Automation Systems Inc. All enterprise data nodes encrypted securely.</p>
+                <div class="footer-socials">
+                    <a href="#" aria-label="Connect GitHub Data Stack Target"><i class="fa-brands fa-github"></i></a>
+                    <a href="#" aria-label="Connect LinkedIn Professional Context Matrix"><i class="fa-brands fa-linkedin"></i></a>
+                </...
+                <a href="#" aria-label="Connect Twitter Grid Network Pipeline"><i class="fa-brands fa-twitter"></i></a>
+            </div>
+        </footer>
+
+    </main>
+</div>
+
+<button class="back-to-top-widget" id="backToTopActionNode" aria-label="Scroll Back To View Top Interface"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script>
+    /* ==========================================================================
+       A. INLINE CONSTANT ENTERPRISE CONFIGURATION DICTIONARIES
+       ========================================================================== */
+    const GOVERNMENT_SCHEMES_DATA = [
+        { name: "PM-KISAN Financial Support", scope: "Income Supplementation", details: "Direct annual liquidity injection of $80 across three installments to stabilize asset operational inputs.", link: "https://pmkisan.gov.in" },
+        { name: "Pradhan Mantri Fasal Bima", scope: "Yield Risk Shield", details: "High-mitigation credit protection hedging complete production runs against unpredictable weather damage.", link: "https://pmfby.gov.in" },
+        { name: "National Soil Health Card", scope: "Nutrient Mapping", details: "Institutional chemical analytics testing cycles mapping optimization metrics for NPK soil compound deployment.", link: "https://soilhealth.dac.gov.in" },
+        { name: "Paramparagat Krishi Vikas", scope: "Organic Standard Grants", details: "Dedicated support pipeline for transition to organic models, with commercial processing and certification incentives.", link: "https://pgsindia-ncof.gov.in" }
+    ];
+
+   const AGRONOMIC_TIPS_DATA = [
+    { 
+        title: "Precision Drip Automation Cycles | सटीक ड्रिप स्वचालन चक्र", 
+        category: "Water Management | जल प्रबंधन", 
+        advice: "Calibrate localized drip manifold triggers strictly between 0400h and 0600h to prevent evaporative drawdown loss. / वाष्पीकरण के कारण होने वाले पानी के नुकसान को रोकने के लिए स्थानीयकृत ड्रिप मैनिफोल्ड ट्रिगर्स को कड़ाई से सुबह 04:00 बजे से 06:00 बजे के बीच कैलिब्रेट करें।"
+    },
+    { 
+        title: "Integrated Bio-Pesticide Traps | एकीकृत जैव-कीटनाशक जाल", 
+        category: "Pest Containment | कीट नियंत्रण", 
+        advice: "Deploy pheromone-regulated insect intercept containment loops around boundary perimeters to protect cash crop nodes. / नकद फसलों की सुरक्षा के लिए बाहरी सीमाओं के चारों ओर फेरोमोन-नियंत्रित कीट अवरोधन लूप स्थापित करें।"
+    },
+    { 
+        title: "Green Manure Cover Strategy | हरि खाद आवरण रणनीति", 
+        category: "Soil Enhancement | मृदा संवर्धन", 
+        advice: "Inter-row seed leguminous cover varieties to securely fix nitrogen reserves during seasonal resting schedules. / मौसमी विश्राम अवधि के दौरान मिट्टी में नाइट्रोजन भंडार को सुरक्षित रूप से स्थिर करने के लिए कतारों के बीच में फलीदार आवरण वाली फसलें बोएं।"
+    }
+];
+    const PATHOLOGY_ENCYCLOPEDIA_DATA = {
+        tomato: {
+            title: "Tomato Disease Index Matrix",
+            disease: "Early Blight (Alternaria solani)",
+            symptoms: "Concentric ring spotting scaling vertically across old lower foliage profiles.",
+            causes: "Fungal pathogen spores sustained by warm ambient humidity and overhead watering splashes.",
+            treatment: "Apply balanced preventative copper hydroxide solutions immediately and trim dead foliage structures."
+        },
+        rice: {
+            title: "Rice Disease Index Matrix",
+            disease: "Bacterial Leaf Blight (Xanthomonas oryzae)",
+            symptoms: "Linear wavy yellowing lesions along blade margins transforming into grayish necrotic sheets.",
+            causes: "Systemic bacterial propagation through leaf lesions during severe rain and wind storms.",
+            treatment: "Drain field arrays completely to arrest bacterial dispersion loops. Lower nitrogen inputs."
+        },
+        wheat: {
+            title: "Wheat Disease Index Matrix",
+            disease: "Stripe Rust (Puccinia striiformis)",
+            symptoms: "Parallel linear tracks of bright yellow pustules cutting cleanly down leaf surfaces.",
+            causes: "Airborne fungal spores traveling across vast multi-mile vectors under cool conditions.",
+            treatment: "Deploy verified triazole fungicide mixtures early across the entire grid sector."
+        }
+    };
+
+    const METEOROLOGICAL_FORECAST_DATA = [
+        { day: "Thu 02", icon: "fa-cloud-sun", temp: "29°C", state: "Partly Cloudy" },
+        { day: "Fri 03", icon: "fa-cloud-showers-heavy", temp: "26°C", state: "Heavy Rain" },
+        { day: "Sat 04", icon: "fa-cloud", temp: "27°C", state: "Overcast Grid" },
+        { day: "Sun 05", icon: "fa-sun", temp: "31°C", state: "Optimal Clear" },
+        { day: "Mon 06", icon: "fa-sun", temp: "32°C", state: "High Heat Cycle" }
+    ];
+
+    const COMMODITY_MARKET_INDEX_DATA = [
+    { crop: "Basmati Rice", price: 10687.50, prev: 10355.00, direction: "up", delta: "3.21%", status: "Normal" },
+    { crop: "Wheat", price: 7999.00, prev: 8217.50, direction: "down", delta: "2.66%", status: "Unstable" },
+    { crop: "Soybean", price: 13775.00, prev: 13300.00, direction: "up", delta: "3.57%", status: "High Demand" },
+    { crop: "Maize (Corn)", price: 5899.50, prev: 5899.50, direction: "stable", delta: "0.00%", status: "No Change" }
+];
+    /* ==========================================================================
+       B. ARCHITECTURE LIFE-CYCLE CONTEXT INITIALIZATION ENGINE
+       ========================================================================== */
+    document.addEventListener("DOMContentLoaded", () => {
+        initPreloaderEngine();
+        initNavigationRouter();
+        initThemePersistenceEngine();
+        initDropdownUXWidgets();
+        initDashboardAnalyticsCounters();
+        initGlobalSearchEngine();
+        initDynamicContentTemplates();
+        initPredictorInferenceForm();
+        initDiagnosticComputerVisionSandbox();
+        initContactTicketEngine();
+        initScrollTrackingWidgets();
+    });
+
+    /* 1. SYSTEM INITIALIZATION PRELOADER */
+    function initPreloaderEngine() {
+        const preloader = document.getElementById("preloader");
+        const bar = document.getElementById("loaderBar");
+        let currentWidth = 0;
+        
+        const incrementInterval = setInterval(() => {
+            currentWidth += Math.floor(Math.random() * 25) + 10;
+            if (currentWidth >= 100) {
+                currentWidth = 100;
+                clearInterval(incrementInterval);
+                setTimeout(() => {
+                    preloader.classList.add("fade-out");
+                    initTypingEffectAnimation();
+                }, 200);
+            }
+            bar.style.width = `${currentWidth}%`;
+        }, 80);
+    }
+
+    /* 2. CORE MODULE ROUTING CONTROLLER NAVIGATION SYSTEM */
+    function initNavigationRouter() {
+        const sidebarLinks = document.querySelectorAll(".sidebar-menu li");
+        const sections = document.querySelectorAll(".module-section");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        
+        sidebarLinks.forEach(link => {
+            link.addEventListener("click", function(e) {
+                e.preventDefault();
+                const routeTarget = this.getAttribute("data-target");
+                
+                sidebarLinks.forEach(l => l.classList.remove("active"));
+                this.classList.add("active");
+                
+                sections.forEach(sec => {
+                    sec.classList.remove("active-section");
+                    if (sec.id === routeTarget) {
+                        sec.classList.add("active-section");
+                        sec.classList.add("animate-slide-up");
+                    }
+                });
+                
+                document.body.classList.remove("sidebar-mobile-open");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            });
+        });
+
+        // Sidebar expand collapse engine configurations
+        sidebarToggle.addEventListener("click", () => {
+            if (window.innerWidth <= 768) {
+                document.body.classList.toggle("sidebar-mobile-open");
+            } else {
+                document.body.classList.toggle("sidebar-collapsed");
+            }
+        });
+
+        // Interactive Redirection Shortcuts Action Bindings
+        document.querySelectorAll(".redirection-action-node").forEach(node => {
+            node.addEventListener("click", function() {
+                const targetModule = this.getAttribute("data-route");
+                const matchingMenuAnchor = document.querySelector(`.sidebar-menu li[data-target="${targetModule}"]`);
+                if(matchingMenuAnchor) matchingMenuAnchor.click();
+            });
+        });
+    }
+
+    /* 3. PERSISTENT SYSTEM APPLICATION LIGHT/DARK THEME MANAGEMENT */
+    function initThemePersistenceEngine() {
+        const toggleBtn = document.getElementById("themeToggleBtn");
+        const currentSavedTheme = localStorage.getItem("agricare-theme-layer") || "light";
+        
+        document.documentElement.setAttribute("data-theme", currentSavedTheme);
+        updateThemeToggleIcon(currentSavedTheme);
+
+        toggleBtn.addEventListener("click", () => {
+            const activeState = document.documentElement.getAttribute("data-theme");
+            const alteredState = activeState === "dark" ? "light" : "dark";
+            
+            document.documentElement.setAttribute("data-theme", alteredState);
+            localStorage.setItem("agricare-theme-layer", alteredState);
+            updateThemeToggleIcon(alteredState);
+        });
+    }
+
+    function updateThemeToggleIcon(theme) {
+        const icon = document.querySelector("#themeToggleBtn i");
+        if(theme === "dark") {
+            icon.className = "fa-solid fa-sun";
+        } else {
+            icon.className = "fa-solid fa-moon";
+        }
+    }
+
+    /* 4. NAVBAR NOTIFICATION PANEL DROP-DOWN HOOKS */
+    function initDropdownUXWidgets() {
+        const btn = document.getElementById("notifDropdownBtn");
+        const panel = document.getElementById("notifDropdownPanel");
+
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            panel.classList.toggle("show");
+        });
+
+        document.addEventListener("click", () => {
+            panel.classList.remove("show");
+        });
+    }
+
+    /* 5. METRIC TELEMETRY COUNTER DIGITAL ROLLOVER ANIMATION RUNNERS */
+    function initDashboardAnalyticsCounters() {
+        const counters = document.querySelectorAll(".counter");
+        
+        counters.forEach(counter => {
+            const ceilingTarget = parseInt(counter.getAttribute("data-target"), 10);
+            let baseline = 0;
+            const velocityStep = Math.ceil(ceilingTarget / 40);
+            
+            const processIncrement = setInterval(() => {
+                baseline += velocityStep;
+                if (baseline >= ceilingTarget) {
+                    counter.innerText = ceilingTarget.toLocaleString();
+                    clearInterval(processIncrement);
+                } else {
+                    counter.innerText = baseline.toLocaleString();
+                }
+            }, 25);
+        });
+    }
+
+    /* 6. GLOBAL STRATEGIC REGISTRY TEXT MATRIX FILTER SEARCH FILTER */
+    function initGlobalSearchEngine() {
+        const searchInput = document.getElementById("globalSearchInput");
+        
+        searchInput.addEventListener("input", function() {
+            const queryVector = this.value.toLowerCase().trim();
+            const activeScope = document.querySelector(".module-section.active-section.data-searchable-scope");
+            
+            if(!activeScope) return; // Do not filter non-searchable or procedural calculation blocks
+
+            const contentCards = activeScope.querySelectorAll(".glass-card, tr");
+            
+            contentCards.forEach(card => {
+                const innerTextDataString = card.innerText.toLowerCase();
+                if(innerTextDataString.includes(queryVector)) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    }
+
+    /* 7. ASYNC CORE STATIC COMPONENT INJECTION AND DYNAMIC TEMPLATING ENGINE */
+    function initDynamicContentTemplates() {
+        // Build Federal Government Program Profiles Matrix View
+        const schemesWrapper = document.getElementById("schemesWrapperTargetGrid");
+        schemesWrapper.innerHTML = GOVERNMENT_SCHEMES_DATA.map(item => `
+            <div class="glass-card interactive-lift">
+                <span class="scheme-badge">${item.scope}</span>
+                <h3 style="font-size: 1.1rem; max-width: 75%; margin-bottom: 12px;">${item.name}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5; min-height: 60px;">${item.details}</p>
+                <div style="margin-top: 16px; display:flex; gap:10px;">
+                    <a href="${item.link}" target="_blank" class="agri-btn" style="padding: 8px 14px; font-size:0.75rem;">Apply Portal <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                </div>
+            </div>
+        `).join('');
+
+        // Build Strategic Agronomic Field Guidelines Module Card Layouts
+        const tipsWrapper = document.getElementById("tipsWrapperTargetGrid");
+        tipsWrapper.innerHTML = AGRONOMIC_TIPS_DATA.map(tip => `
+            <div class="glass-card interactive-lift">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                    <i class="fa-solid fa-lightbulb" style="color: var(--secondary-green); font-size:1.2rem;"></i>
+                    <span style="font-size:0.75rem; text-transform:uppercase; font-weight:600; color:var(--text-sub);">${tip.category}</span>
+                </div>
+                <h3 style="font-size: 1.05rem; margin-bottom:8px;">${tip.title}</h3>
+                <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5;">${tip.advice}</p>
+            </div>
+        `).join('');
+
+        // Build Micro-Climate Predictive Telemetry Forecast Node Array Elements
+        const forecastContainer = document.getElementById("weatherForecastWrapperContainer");
+        forecastContainer.innerHTML = METEOROLOGICAL_FORECAST_DATA.map(f => `
+            <div class="weather-mini-node" style="background: var(--white);">
+                <span style="font-weight:600; color: var(--text-main);">${f.day}</span>
+                <i class="fa-solid ${f.icon}" style="font-size:1.4rem; margin:10px 0; display:block;"></i>
+                <font style="font-size:1.1rem; font-weight:700;">${f.temp}</font>
+                <span style="font-size:0.7rem; color:var(--text-sub); margin-top:4px;">${f.state}</span>
+            </div>
+        `).join('');
+
+        // Build Wholesale Agro-Commodity Index Matrix Datatable Interface Lines
+        const marketTableBody = document.getElementById("marketPricesTableBodyTarget");
+        marketTableBody.innerHTML = COMMODITY_MARKET_INDEX_DATA.map(row => {
+            const trendClass = row.direction === 'up' ? 'trend-up' : (row.direction === 'down' ? 'trend-down' : 'trend-stable');
+            const trendIcon = row.direction === 'up' ? 'fa-arrow-trend-up' : (row.direction === 'down' ? 'fa-arrow-trend-down' : 'fa-minus');
+            return `
+                <tr>
+                    <td><strong>${row.crop}</strong></td>
+                    <td>$${row.price.toFixed(2)}</td>
+                    <td>$${row.prev.toFixed(2)}</td>
+                    <td><span class="trend-badge ${trendClass}"><i class="fa-solid ${trendIcon}"></i> ${row.delta}</span></td>
+                    <td><span style="font-size:0.8rem; font-weight:500;">${row.status}</span></td>
+                </tr>
+            `;
+        }).join('');
+
+        // Assemble Interactive Pathology Directory Tabs Layout Panel Controller
+        initEncyclopediaInterface();
+    }
+
+    function initEncyclopediaInterface() {
+        const tabsNav = document.getElementById("encyclopediaTabsContainer");
+        const contentPanel = document.getElementById("encyclopediaDynamicContentPanel");
+        
+        const targetKeys = Object.keys(PATHOLOGY_ENCYCLOPEDIA_DATA);
+        
+        tabsNav.innerHTML = targetKeys.map((key, index) => `
+            <div class="tab-nav-pill ${index === 0 ? 'active-pill' : ''}" data-crop-key="${key}">
+                ${key.charAt(0).toUpperCase() + key.slice(1)} Matrix
+            </div>
+        `).join('');
+
+        const renderContentLayout = (key) => {
+            const data = PATHOLOGY_ENCYCLOPEDIA_DATA[key];
+            contentPanel.innerHTML = `
+                <h3 style="margin-bottom:6px; font-size:1.2rem; color: var(--primary-green);">${data.title}</h3>
+                <h4 style="font-size:1rem; margin-bottom:14px; color:var(--text-main);">Detected Profile: <em style="color:#D32F2F;">${data.disease}</em></h4>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; font-size:0.85rem;">
+                    <div>
+                        <strong>Symptomatic Expressions:</strong>
+                        <p style="color:var(--text-sub); margin-top:4px; line-height:1.4;">${data.symptoms}</p>
+                    </div>
+                    <div>
+                        <strong>Primary Etiology Root Causes:</strong>
+                        <p style="color:var(--text-sub); margin-top:4px; line-height:1.4;">${data.causes}</p>
+                    </div>
+                </div>
+                <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--glass-border); font-size:0.85rem;">
+                    <strong>Immediate Remedial Containment Protocol:</strong>
+                    <p style="color:var(--text-sub); margin-top:4px; line-height:1.4;">${data.treatment}</p>
+                </div>
+            `;
+        };
+
+        renderContentLayout(targetKeys[0]);
+
+        document.querySelectorAll(".tab-nav-pill").forEach(pill => {
+            pill.addEventListener("click", function() {
+                document.querySelectorAll(".tab-nav-pill").forEach(p => p.classList.remove("active-pill"));
+                this.classList.add("active-pill");
+                renderContentLayout(this.getAttribute("data-crop-key"));
+            });
+        });
+    }
+
+    /* 8. PREDICTIVE ML INTERACTION CALCULATION FORM SIMULATION VALIDATION */
+    function initPredictorInferenceForm() {
+        const form = document.getElementById("cropPredictorFormEngine");
+        const fallback = document.getElementById("predictionResultFallbackDisplay");
+        const activeView = document.getElementById("predictionResultActiveDisplay");
+        
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            
+            const soil = document.getElementById("soilTypeSelectNode").value;
+            const targetCropLabel = document.getElementById("predictedCropTargetLabel");
+            const targetConfidence = document.getElementById("predictionConfidenceMetric");
+            
+            // Basic deterministic logic arrays mapping environmental settings to recommendations
+            let selection = "High-Yield Wheat Dryland Blend";
+            let varianceConfidence = "93.4%";
+            
+            if(soil === "Loamy") { selection = "Premium Alluvial Rice Hybrid"; varianceConfidence = "96.2%"; }
+            else if(soil === "Clayey") { selection = "Long-Staple Cotton Spec Class A"; varianceConfidence = "91.8%"; }
+            else if(soil === "Black") { selection = "Enriched Soya Legume Core"; varianceConfidence = "95.1%"; }
+            
+            fallback.style.display = "none";
+            activeView.style.display = "block";
+            
+            targetCropLabel.innerText = selection;
+            targetConfidence.innerText = `${varianceConfidence} Match Confidence`;
+            activeView.classList.add("animate-fade-in");
+        });
+    }
+
+    /* 9. COMPUTER VISION LEAF PAYLOAD DIAGNOSTIC FILE DROPZONE SIMULATOR */
+    function initDiagnosticComputerVisionSandbox() {
+        const dropzone = document.getElementById("diagnosticDropzoneWrapper");
+        const fileInput = document.getElementById("hiddenDropzoneFileInputNode");
+        const triggerBtn = document.getElementById("dropzoneSimulateTriggerBtn");
+        const previewContainer = document.getElementById("diagnosticImagePreviewContainer");
+        const previewImg = document.getElementById("diagnosticTargetImageElement");
+        const fallbackDisplay = document.getElementById("diagnosticFallbackDisplay");
+        const activeDisplay = document.getElementById("diagnosticActiveDisplay");
+        const purgeBtn = document.getElementById("resetDiagnosticWorkflowBtn");
+
+        triggerBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        });
+
+        dropzone.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
+        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            if(e.dataTransfer.files.length) executeMockAnalysisPipeline(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener("change", function() {
+            if(this.files.length) executeMockAnalysisPipeline(this.files[0]);
+        });
+
+        function executeMockAnalysisPipeline(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                dropzone.style.display = "none";
+                previewContainer.style.display = "block";
+                
+                // Transition active ML assessment data display pipelines open
+                fallbackDisplay.style.display = "none";
+                activeDisplay.style.display = "block";
+                activeDisplay.classList.add("animate-fade-in");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        purgeBtn.addEventListener("click", () => {
+            fileInput.value = "";
+            previewImg.src = "";
+            previewContainer.style.display = "none";
+            dropzone.style.display = "flex";
+            activeDisplay.style.display = "none";
+            fallbackDisplay.style.display = "block";
+        });
+    }
+
+    /* 10. SYSTEM HELP DESK CRM TICKET SUBMISSION VALIDATOR ENGINE */
+    function initContactFormEngine() {
+        const form = document.getElementById("contactFormSystemEngine");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            alert("Telemetry support contract transmission pipeline accepted. Data packets queued for dispatch desk validation.");
+            form.reset();
+        });
+    }
+
+    /* 11. LAYOUT HERO BANNER INTERACTIVE TYPING EFFECT PIPELINE */
+    function initTypingEffectAnimation() {
+        const targetElement = document.getElementById("typingWelcome");
+        const contentMessageString = "Welcome back, Sector Agronomist Devon Lane.";
+        let characterIndex = 0;
+        
+        function processCharacterStream() {
+            if (characterIndex < contentMessageString.length) {
+                targetElement.innerHTML += contentMessageString.charAt(characterIndex);
+                characterIndex++;
+                setTimeout(processCharacterStream, 40);
+            }
+        }
+        processCharacterStream();
+    }
+
+    /* 12. FIXED POSITION PERSISTENT SCROLL ENGINE & WINDOW CONTROLS */
+    function initScrollTrackingWidgets() {
+        const topBtn = document.getElementById("backToTopActionNode");
+        
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 400) {
+                topBtn.style.display = "flex";
+            } else {
+                topBtn.style.display = "none";
+            }
+        });
+
+        topBtn.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    }
+</script>
+</body>
+</html>
